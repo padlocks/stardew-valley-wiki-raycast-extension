@@ -20,6 +20,7 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search Stardew Valley Wiki..."
       throttle
+      isShowingDetail
     >
       <List.Section title="Results" subtitle={data?.length + ""}>
         {data?.map((searchResult: SearchResult) => (
@@ -35,6 +36,9 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
     <List.Item
       title={searchResult.name}
       // subtitle={searchResult.description}
+      detail={
+        <List.Item.Detail markdown="![Illustration](https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png)" />
+      }
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -50,6 +54,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
 async function parseFetchResponse(response: Response) {
   
   const json = await response.json() 
+  console.log(json)
   if (!response.ok || "message" in json) {
     throw new Error("message" in json ? json.message : response.statusText);
   }
