@@ -2,6 +2,7 @@ import { ActionPanel, Action, List } from "@raycast/api";
 import { useFetch, Response } from "@raycast/utils";
 import { useState } from "react";
 import { URLSearchParams } from "node:url";
+import fetch from "node-fetch"
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -37,7 +38,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       title={searchResult.name}
       // subtitle={searchResult.description}
       detail={
-        <List.Item.Detail markdown="![Illustration](https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png)" />
+        <List.Item.Detail markdown={searchResult.detail} />
       }
       actions={
         <ActionPanel>
@@ -65,13 +66,23 @@ async function parseFetchResponse(response: Response) {
   const result = titles.map((title: any, index: string | number) => ({
     name: title,
     url: urls[index],
+    detail: "This is detail"
   } as SearchResult));
 
   
   return result
 }
 
+async function getItemDetail(url:string) {
+  const response = await fetch('https://github.com/');
+  const body = await response.text();
+
+  console.log(body);
+  return body;
+}
+
 interface SearchResult {
   name: string;
   url: string;
+  detail: string;
 }
