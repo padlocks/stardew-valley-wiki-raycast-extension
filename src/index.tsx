@@ -63,11 +63,13 @@ async function parseFetchResponse(response: Response) {
   const titles = json[1]
   const number_of_results = titles.length 
   const urls = json[3]
-  const result = titles.map((title: any, index: string | number) => ({
-    name: title,
-    url: urls[index],
-    detail: "This is detail"
-  } as SearchResult));
+  const result = Promise.all(
+    titles.map(async (title: any, index: string | number) => ({
+      name: title,
+      url: urls[index],
+      detail: await getItemDetail(urls[index])
+    } as SearchResult))
+  );
 
   
   return result
