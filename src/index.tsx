@@ -7,7 +7,7 @@ import fetch from "node-fetch"
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const { data, isLoading } = useFetch(
-    "https://stardewvalleywiki.com/mediawiki/api.php?action=opensearch&format=json&formatversion=2&namespace=0&limit=10&" +
+    "https://stardewvalleywiki.com/mediawiki/api.php?action=opensearch&format=json&formatversion=2&namespace=0&limit=5&" +
       // send the search query to the API
       new URLSearchParams({ search: searchText.length === 0 ? "calendar" : searchText }),
     {
@@ -67,7 +67,7 @@ async function parseFetchResponse(response: Response) {
     titles.map(async (title: any, index: string | number) => ({
       name: title,
       url: urls[index],
-      detail: await getItemDetail(urls[index])
+      detail: await getItemDetail(title)
     } as SearchResult))
   );
 
@@ -75,12 +75,16 @@ async function parseFetchResponse(response: Response) {
   return result
 }
 
-async function getItemDetail(url:string) {
-  const response = await fetch('https://github.com/');
-  const body = await response.text();
+async function getItemDetail(title:string) {
+  // https://stardewcommunitywiki.com/mediawiki/api.php?action=parse&page=Weather
+  // https://stardewcommunitywiki.com/mediawiki/api.php?action=query&prop=revisions&titles=Coffee%20Bean&rvslots=*&rvprop=content&formatversion=2
+  const base_url = 'https://stardewcommunitywiki.com/mediawiki/api.php?action=query&prop=revisions&rvprop=content&formatversion=2&format=json&titles=';
+  const response = await fetch(base_url + title);
+  const body = await response.json();
 
-  console.log(body);
-  return body;
+  const content  = body.query.pages[0].revisions[0].content;
+  console.log(body.query.pages[0].revisions[0].content);
+  return content;
 }
 
 interface SearchResult {
