@@ -118,10 +118,10 @@ async function getItemDetail(title) {
   body = body.replace(/data-sort-value="(\d+)"\s*/g, '');
   body = body.replace(/<table[^>]*>/g, '<table>').replace(/<\/tr>\s*<tr[^>]*>/g, '</tr><tr>').replace(/<\/td>\s*<td[^>]*>/g, '</td><td>').replace(/<\/table>\s*<table[^>]*>/g, '</table><table>').replace(/<\/table><table><\/table>/g, '');
 
-  // console.log(body);
+  console.log(body);
 
   const content = nhm.translate(body);
-  // markdownCache.set(title, content);
+  markdownCache.set(title, content);
 
   return content;
 };
