@@ -39,7 +39,7 @@ function SearchListItem({ searchResult }) {
   return (
     <List.Item
       title={searchResult.name}
-      // subtitle={searchResult.description}
+      subtitle={searchResult.description}
       detail={
         <List.Item.Detail markdown={searchResult.detail} />
       }
@@ -118,10 +118,10 @@ async function getItemDetail(title) {
   body = body.replace(/data-sort-value="(\d+)"\s*/g, '');
   body = body.replace(/<table[^>]*>/g, '<table>').replace(/<\/tr>\s*<tr[^>]*>/g, '</tr><tr>').replace(/<\/td>\s*<td[^>]*>/g, '</td><td>').replace(/<\/table>\s*<table[^>]*>/g, '</table><table>').replace(/<\/table><table><\/table>/g, '');
 
-  console.log(body);
+  // console.log(body);
 
   const content = nhm.translate(body);
-  markdownCache.set(title, content);
+  // markdownCache.set(title, content);
 
   return content;
 };
@@ -155,14 +155,14 @@ const nhm = new NodeHtmlMarkdown({
             res += '| ';
             for (let i = 0; i < colWidth.length; i++) {
                 const c = cols[i] ?? '';
-                res += c.padEnd(colWidth[i]) + ' |';
+                res += c + ' '.repeat(colWidth[i] - c.length) + ' |'; // Pad content to match column width
             }
             res += '\n';
             if (rowNumber === 0) res += '|' + colWidth.map(w => '-'.repeat(w + 2)).join('|') + '|\n';
         });
         return res;
-    }
-  }),
+    },
+}),
 }, undefined);
 
 function splitSpecial(s) {
