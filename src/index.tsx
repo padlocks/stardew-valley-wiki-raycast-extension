@@ -3,6 +3,7 @@ import { useFetch, Response } from "@raycast/utils";
 import { useState } from "react";
 import { URLSearchParams } from "node:url";
 import fetch from "node-fetch"
+import { NodeHtmlMarkdown } from 'node-html-markdown'
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -31,6 +32,7 @@ export default function Command() {
     </List>
   );
 }
+
 
 function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
   return (
@@ -75,17 +77,53 @@ async function parseFetchResponse(response: Response) {
   return result
 }
 
-async function getItemDetail(title:string) {
-  // https://stardewcommunitywiki.com/mediawiki/api.php?action=parse&page=Weather
-  // https://stardewcommunitywiki.com/mediawiki/api.php?action=query&prop=revisions&titles=Coffee%20Bean&rvslots=*&rvprop=content&formatversion=2
-  const base_url = 'https://stardewcommunitywiki.com/mediawiki/api.php?action=query&prop=revisions&rvprop=content&formatversion=2&format=json&titles=';
-  const response = await fetch(base_url + title);
-  const body = await response.json();
+async function checkImageStatus(url) {
+  try {
+    const response = await fetch(url);
+    if (response.ok) {
+      return { url, status: 'loaded' };
+    } else {
+      return { url, status: 'failed' };
+    }
+  } catch (error) {
+    return { url, status: 'failed' };
+  }
+}
 
-  const content  = body.query.pages[0].revisions[0].content;
-  console.log(body.query.pages[0].revisions[0].content);
+async function getItemDetail(title) {
+  const base_url = 'https://stardewvalleywiki.com/';
+  const response = await fetch(base_url + title);
+  let body = await response.text();
+
+  const imageUrls = [String];
+  body = body.replace(/<img.*?src="(.*?)".*?>/g, (match, url) => {
+    url = url.replace('/mediawiki', base_url + 'mediawiki');
+    if (!url.startsWith('http')) {
+      if (!url.includes('https://stardewvalleywiki.com')) {
+        url = base_url + url;
+      }
+    }
+    imageUrls.push(url);
+    return `<img src="${url}" />`;
+  });
+
+  const imageLoadingPromises = imageUrls.map(checkImageStatus);
+  const imageLoadingResults = await Promise.all(imageLoadingPromises);
+
+  const failedImages = imageLoadingResults.filter((result) => result.status === 'failed');
+  failedImages.forEach((failedImage) => console.log(`Failed to load image: ${failedImage.url}`));
+
+  body = body.replace(/data-sort-value="(\d+)"&gt;/g, (match, number) => {
+    return ``;
+  });
+
+  console.log(body);
+
+  const content = NodeHtmlMarkdown.translate(body);
+  console.log(content);
   return content;
 }
+
 
 interface SearchResult {
   name: string;
